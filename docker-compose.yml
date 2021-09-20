@@ -13,3 +13,9 @@ services:
       MONGO_INITDB_DATABASE: root-db
     volumes:
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  redis-server:
+    image: "redis:alpine"
+    command: redis-server
+    ports:
+      - "6379:6379"

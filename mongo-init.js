@@ -6,11 +6,11 @@ db.createUser(
     roles: [{ role: 'readWrite', db: 'property_pro' }],
   },
 );
-db.createCollection('users');
-db.users.insert({
-    _id: 1,
-    first_name: "John",
-    last_name: "Doe",
-    email: "johnd@email.com",
-    phone: "08012345678"
-})
+// db.createCollection('users');
+// db.users.insert({
+//     _id: "1",
+//     first_name: "Jay",
+//     last_name: "Mykels",
+//     email: "jaymykels69@gmail.com",
+//     phone: "08012345678"
+// })
