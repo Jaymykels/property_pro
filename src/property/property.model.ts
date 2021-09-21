@@ -26,4 +26,5 @@ export interface Property extends mongoose.Document {
   occupancy_type: string;
   rent_amount: string;
   rent_frequency: string;
-  is_published?: boolean;}
+  is_published?: boolean;
+}

@@ -51,43 +51,57 @@ export class PropertyService {
 
     if (!is_published) return result;
 
-    this.updatePostPropertiesCache(result._id, publishedDate)
+    this.updatePostPropertiesCache(result._id, publishedDate);
 
     return result;
   }
 
   async postProperty(property: Property): Promise<any> {
-    const res = await this.httpService.post(process.env.POST_URL, property, { headers: { 'content-type': 'application/json'}}).toPromise()
-    this.logger.debug(`post response ${JSON.stringify(res.data)}`)
+    const res = await this.httpService
+      .post(process.env.POST_URL, property, {
+        headers: { 'content-type': 'application/json' },
+      })
+      .toPromise();
+    this.logger.debug(`post response ${JSON.stringify(res.data)}`);
   }
 
   @Cron('60 * * * * *')
   async publishProperty(): Promise<void> {
-    let postProperties: string | undefined | Record<string, string> = await this.cacheManager.get('post-properties');
+    let postProperties: string | undefined | Record<string, string> =
+      await this.cacheManager.get('post-properties');
     if (!postProperties) return;
-    postProperties = JSON.parse(postProperties as string) as Record<string, string>
-    this.postPropertiesJson(postProperties)
+    postProperties = JSON.parse(postProperties as string) as Record<
+      string,
+      string
+    >;
+    this.postPropertiesJson(postProperties);
 
-    let emailProperties: string | undefined | Record<string, string> = await this.cacheManager.get('email-properties');
+    let emailProperties: string | undefined | Record<string, string> =
+      await this.cacheManager.get('email-properties');
     if (!emailProperties) return;
-    emailProperties = JSON.parse(emailProperties as string) as Record<string, string>
-    this.sendPropertiesEmail(emailProperties)
+    emailProperties = JSON.parse(emailProperties as string) as Record<
+      string,
+      string
+    >;
+    this.sendPropertiesEmail(emailProperties);
   }
-  
-  async sendPropertiesEmail(propertiesCache: Record<string, string>): Promise<void> {
+
+  async sendPropertiesEmail(
+    propertiesCache: Record<string, string>,
+  ): Promise<void> {
     this.logger.log(`Searching email properties`);
     Object.keys(propertiesCache).forEach(async (key) => {
       const today = new Date();
       const propertyDate = new Date(propertiesCache[key]);
       const interval = Number(process.env.EMAIL_INTERVAL);
       propertyDate.setTime(propertyDate.getTime() + interval * 60000);
-  
+
       if (!(propertyDate <= today)) return;
-  
+
       const property = await this.propertyModel.findOne({ _id: key });
       const user = await this.userService.getUser(property.user_id);
       await this.mailService.sendEmail(user, property);
-  
+
       delete propertiesCache[key];
       const value = JSON.stringify(propertiesCache);
       await this.cacheManager.set('email-properties', value, { ttl: 1200 });
@@ -95,30 +109,33 @@ export class PropertyService {
     });
   }
 
-  async postPropertiesJson(propertiesCache: Record<string, string>): Promise<void> {
+  async postPropertiesJson(
+    propertiesCache: Record<string, string>,
+  ): Promise<void> {
     this.logger.log(`Searching post properties`);
-    
+
     Object.keys(propertiesCache).forEach(async (key) => {
       const today = new Date();
       const propertyDate = new Date(propertiesCache[key]);
       const interval = Number(process.env.POST_INTERVAL);
       propertyDate.setTime(propertyDate.getTime() + interval * 60000);
-  
+
       if (!(propertyDate <= today)) return;
-  
+
       const property = await this.propertyModel.findOne({ _id: key });
-      this.postProperty(property)
-      
-      this.updateEmailPropertiesCache(key, propertiesCache[key])
+      this.postProperty(property);
+
+      this.updateEmailPropertiesCache(key, propertiesCache[key]);
       delete propertiesCache[key];
       const value = JSON.stringify(propertiesCache);
       await this.cacheManager.set('post-properties', value, { ttl: 1200 });
       this.logger.log(`Updating post cache with '${value}'`);
     });
   }
-  
+
   async updateEmailPropertiesCache(key: string, value: string): Promise<void> {
-    let emailPropertiesCache = JSON.parse(await this.cacheManager.get('email-properties')) || null;
+    let emailPropertiesCache =
+      JSON.parse(await this.cacheManager.get('email-properties')) || null;
     if (emailPropertiesCache) emailPropertiesCache[key] = value;
     else emailPropertiesCache = { [key]: value };
     const emailValue = JSON.stringify(emailPropertiesCache);
