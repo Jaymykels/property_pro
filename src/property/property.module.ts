@@ -6,11 +6,13 @@ import { PropertyController } from './property.controller';
 import { PropertySchema } from './property.model';
 import { PropertyService } from './property.service';
 import * as redisStore from 'cache-manager-redis-store';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     MailModule,
     UserModule,
+    HttpModule,
     MongooseModule.forFeature([{ name: 'Property', schema: PropertySchema }]),
     CacheModule.register({
       store: redisStore,

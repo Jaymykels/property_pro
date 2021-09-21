@@ -12,7 +12,6 @@ export const PropertySchema = new mongoose.Schema({
   rent_amount: String,
   rent_frequency: String,
   is_published: Boolean,
-  publishedDate: String,
 });
 
 export interface Property extends mongoose.Document {
@@ -27,6 +26,4 @@ export interface Property extends mongoose.Document {
   occupancy_type: string;
   rent_amount: string;
   rent_frequency: string;
-  is_published?: boolean;
-  publishedDate?: string;
-}
+  is_published?: boolean;}

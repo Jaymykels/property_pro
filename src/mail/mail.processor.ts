@@ -52,7 +52,6 @@ export class MailProcessor {
     const { user, property } = job.data;
     delete user._id;
     delete property._id;
-    delete property.publishedDate;
     delete property.__v;
     delete user.__v;
     delete property.user_id;
